@@ -53,32 +53,26 @@ function run_pybamm(;
 
 	pybamm = pyimport("pybamm")
 
-	# Detect PyBaMM version to handle API differences
+	# Detect PyBaMM version to handle API differences (0.x = legacy, 24.x+ = modern)
 	pybamm_version = pyconvert(String, pybamm.__version__)
 	is_legacy = startswith(pybamm_version, "0.")
 
 	# Select model
-	if thermal
-		options = pydict(Dict("thermal" => "lumped"))
-		py_model = if model_name == "SPM"
-			pybamm.lithium_ion.SPM(; options)
-		elseif model_name == "SPMe"
-			pybamm.lithium_ion.SPMe(; options)
-		elseif model_name == "DFN"
-			pybamm.lithium_ion.DFN(; options)
-		else
-			error("Unsupported PyBaMM model: $model_name. Use \"SPM\", \"SPMe\", or \"DFN\".")
-		end
+	model_constructor = if model_name == "SPM"
+		pybamm.lithium_ion.SPM
+	elseif model_name == "SPMe"
+		pybamm.lithium_ion.SPMe
+	elseif model_name == "DFN"
+		pybamm.lithium_ion.DFN
 	else
-		py_model = if model_name == "SPM"
-			pybamm.lithium_ion.SPM()
-		elseif model_name == "SPMe"
-			pybamm.lithium_ion.SPMe()
-		elseif model_name == "DFN"
-			pybamm.lithium_ion.DFN()
-		else
-			error("Unsupported PyBaMM model: $model_name. Use \"SPM\", \"SPMe\", or \"DFN\".")
-		end
+		error("Unsupported PyBaMM model: $model_name. Use \"SPM\", \"SPMe\", or \"DFN\".")
+	end
+
+	py_model = if thermal
+		options = pydict(Dict("thermal" => "lumped"))
+		model_constructor(; options)
+	else
+		model_constructor()
 	end
 
 	# Load parameter set — legacy 0.2.x uses chemistry keyword
@@ -107,7 +101,9 @@ function run_pybamm(;
 
 	np = pyimport("numpy")
 	if isnothing(t_eval)
-		# Default: discharge for 1 hour scaled by C-rate
+		# Default time span: slightly above 1/C_rate hours (3600/C_rate seconds)
+		# to ensure full discharge is captured.  The extra 100 s margin matches the
+		# PyBaMM recommendation of 3700/C.
 		t_end = 3700.0 / C_rate
 		py_t_eval = np.linspace(0.0, t_end, 100)
 	else
