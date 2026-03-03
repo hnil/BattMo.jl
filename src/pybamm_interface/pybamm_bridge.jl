@@ -65,7 +65,11 @@ function _ensure_pybamm()
 	catch
 		# Not yet imported – may need patching
 	end
-	_patch_legacy_pybamm()
+	try
+		_patch_legacy_pybamm()
+	catch e
+		@warn "Failed to patch legacy pybamm for jax compatibility" exception = e
+	end
 	return pyimport("pybamm")
 end
 

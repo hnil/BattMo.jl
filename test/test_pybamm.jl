@@ -46,8 +46,7 @@ end
 		end
 	else
 		@info "Skipping run_pybamm tests: pybamm is not installed or not functional in the current Python environment. " *
-			  "To enable these tests, ensure Python < 3.14 and pybamm >= 24.1 are installed. " *
-			  "The CondaPkg.toml shipped with this repository handles this automatically."
+			  "The CondaPkg.toml shipped with this repository configures the correct Python and pybamm versions automatically."
 		@test_skip true
 	end
 
