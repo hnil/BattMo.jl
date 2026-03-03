@@ -14,20 +14,40 @@ end
 @testset "run_pybamm" begin
 
 	if pybamm_solve_available()
-		result = run_pybamm(;
-			model_name    = "DFN",
-			parameter_set = "Chen2020",
-			C_rate        = 1.0,
-		)
+		@testset "Chen2020 DFN discharge" begin
+			result = run_pybamm(;
+				model_name    = "DFN",
+				parameter_set = "Chen2020",
+				C_rate        = 1.0,
+			)
 
-		@test length(result.time) > 1
-		@test length(result.voltage) == length(result.time)
-		@test length(result.current) == length(result.time)
-		@test result.voltage[1] > 3.0
-		@test result.voltage[end] < 4.5
-		@test all(result.time .>= 0.0)
+			@test length(result.time) > 1
+			@test length(result.voltage) == length(result.time)
+			@test length(result.current) == length(result.time)
+			@test result.voltage[1] > 3.0
+			@test result.voltage[end] < 4.5
+			@test all(result.time .>= 0.0)
+		end
+
+		@testset "Chen2020 DFN with SEI" begin
+			result_sei = run_pybamm(;
+				model_name    = "DFN",
+				parameter_set = "Chen2020",
+				C_rate        = 1.0,
+				sei           = true,
+			)
+
+			@test length(result_sei.time) > 1
+			@test length(result_sei.voltage) == length(result_sei.time)
+			@test length(result_sei.current) == length(result_sei.time)
+			@test result_sei.voltage[1] > 3.0
+			@test result_sei.voltage[end] < 4.5
+			@test all(result_sei.time .>= 0.0)
+		end
 	else
-		@info "Skipping run_pybamm tests: pybamm is not installed or not functional in the current Python environment."
+		@info "Skipping run_pybamm tests: pybamm is not installed or not functional in the current Python environment. " *
+			  "To enable these tests, ensure Python < 3.14 and pybamm >= 24.1 are installed. " *
+			  "The CondaPkg.toml shipped with this repository handles this automatically."
 		@test_skip true
 	end
 

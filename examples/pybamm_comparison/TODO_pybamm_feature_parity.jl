@@ -39,7 +39,8 @@
 # - ❌ Pouch cell 2D thermal model
 #
 # ## Degradation – SEI
-# - ✅ SEI layer growth model
+# - ✅ SEI layer growth model (BattMo: Bolay model; PyBaMM: reaction-limited)
+# - ✅ Comparison example: `chen2020_sei_comparison.jl`
 # - ❌ Electron-migration limited SEI
 # - ❌ Interstitial-diffusion limited SEI
 # - ❌ Solvent-diffusion limited SEI (EC reaction)

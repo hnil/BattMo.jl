@@ -1,0 +1,7 @@
+[deps]
+# Pin Python to a version supported by modern pybamm (requires <3.14)
+python = ">=3.10,<3.14"
+
+[pip.deps]
+# PyBaMM battery modelling framework – used by run_pybamm()
+pybamm = ">=24.1"
