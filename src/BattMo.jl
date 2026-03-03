@@ -183,7 +183,7 @@ using Jutul: tpfv_geometry, apply!, is_cell_major
 using Jutul: StaticCSR, ParallelCSRContext
 using Jutul: jutul_message
 using Jutul: get_1d_interpolator
-using PythonCall: pyconvert, Py
+using PythonCall: PythonCall, pyconvert, pyimport, pydict, pyexec, Py
 using Logging: Logging
 
 
@@ -269,6 +269,8 @@ include("calibration/calibration.jl")
 include("calibration/calibration_utils.jl")
 
 include("tools/print_info.jl")
+
+include("pybamm_interface/pybamm_bridge.jl")
 
 # Precompilation of solver. Run a small battery simulation to precompile everything.
 @compile_workload begin
