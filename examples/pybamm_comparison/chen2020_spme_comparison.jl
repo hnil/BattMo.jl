@@ -41,7 +41,8 @@ for (i, Crate) in enumerate(c_rates)
 
 	# --- PyBaMM SPMe ---
 	t_end = 3700.0 / Crate
-	n_points = max(200, round(Int, t_end / 2.0))
+	dt_fixed = 10.0
+	n_points = max(200, round(Int, t_end / dt_fixed))
 	t_eval = collect(range(0.0, t_end; length = n_points))
 
 	result_pybamm = run_pybamm(;
