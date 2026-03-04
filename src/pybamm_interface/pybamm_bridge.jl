@@ -77,7 +77,7 @@ end
     run_pybamm(; model_name = "DFN", parameter_set = "Chen2020",
                  C_rate = 1.0, t_eval = nothing,
                  temperature = nothing, thermal = false,
-                 sei = false)
+                 sei = false, experiment = nothing)
 
 Run a PyBaMM simulation from Julia using PythonCall and return the results as a
 Julia NamedTuple.
@@ -96,10 +96,16 @@ available on Python ≥ 3.14) and applies compatibility patches automatically.
 - `C_rate::Float64`: C-rate for CC discharge (default `1.0`).
 - `t_eval::Union{Nothing, AbstractVector}`: Time points (s) at which to evaluate.
   If `nothing`, a default time span of `3700/C_rate` seconds is used.
+  Ignored when `experiment` is provided.
 - `temperature::Union{Nothing, Float64}`: Ambient temperature in K. If `nothing`
   uses the parameter-set default.
 - `thermal::Bool`: When `true`, use the lumped thermal model.
 - `sei::Bool`: When `true`, enable the SEI growth model (reaction-limited).
+- `experiment::Union{Nothing, Vector{String}}`: When provided, uses PyBaMM's
+  `Experiment` API instead of a simple CC discharge.  Each string is a PyBaMM
+  experiment step, e.g. `["Discharge at 1C until 2.5 V",
+  "Charge at 1C until 4.2 V", "Hold at 4.2 V until C/50"]`.
+  Steps are passed directly to `pybamm.Experiment`.
 
 # Returns
 A `NamedTuple` with fields:
@@ -114,6 +120,14 @@ A `NamedTuple` with fields:
 using BattMo
 result = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = 1.0)
 result_sei = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = 1.0, sei = true)
+result_cccv = run_pybamm(;
+    parameter_set = "Chen2020",
+    experiment = [
+        "Discharge at 1C until 2.5 V",
+        "Charge at 1C until 4.2 V",
+        "Hold at 4.2 V until C/50",
+    ],
+)
 ```
 """
 function run_pybamm(;
@@ -124,6 +138,7 @@ function run_pybamm(;
 	temperature::Union{Nothing, Float64} = nothing,
 	thermal::Bool = false,
 	sei::Bool = false,
+	experiment::Union{Nothing, Vector{String}} = nothing,
 )
 
 	pybamm = _ensure_pybamm()
@@ -184,19 +199,25 @@ function run_pybamm(;
 	end
 
 	# Build simulation and solve
-	sim = pybamm.Simulation(py_model; parameter_values = params)
-
 	np = pyimport("numpy")
-	if isnothing(t_eval)
-		# Default time span: slightly above 1/C_rate hours (3600/C_rate seconds)
-		# to ensure full discharge is captured.  The extra 100 s margin matches the
-		# PyBaMM recommendation of 3700/C.
-		t_end = 3700.0 / C_rate
-		py_t_eval = np.linspace(0.0, t_end, 100)
+
+	if !isnothing(experiment)
+		py_experiment = pybamm.Experiment(pylist(experiment))
+		sim = pybamm.Simulation(py_model; experiment = py_experiment, parameter_values = params)
+		sol = sim.solve()
 	else
-		py_t_eval = np.array(collect(Float64, t_eval))
+		sim = pybamm.Simulation(py_model; parameter_values = params)
+		if isnothing(t_eval)
+			# Default time span: slightly above 1/C_rate hours (3600/C_rate seconds)
+			# to ensure full discharge is captured.  The extra 100 s margin matches the
+			# PyBaMM recommendation of 3700/C.
+			t_end = 3700.0 / C_rate
+			py_t_eval = np.linspace(0.0, t_end, 100)
+		else
+			py_t_eval = np.array(collect(Float64, t_eval))
+		end
+		sol = sim.solve(; t_eval = py_t_eval)
 	end
-	sol = sim.solve(; t_eval = py_t_eval)
 
 	# Extract results to Julia vectors
 	time_s = pyconvert(Vector{Float64}, sol["Time [s]"].entries)
