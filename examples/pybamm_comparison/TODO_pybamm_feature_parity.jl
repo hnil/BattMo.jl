@@ -64,6 +64,7 @@
 # ## Operating Modes / Cycling Protocols
 # - ✅ Constant current (CC) discharge / charge
 # - ✅ CCCV (constant-current–constant-voltage)
+# - ✅ Multi-cycle CCCV (see `control_protocol_comparison.jl`)
 # - 🔧 Arbitrary cycling protocols (multi-step)
 # - ❌ Drive-cycle / current profile input
 # - ❌ GITT (Galvanostatic Intermittent Titration Technique)
@@ -77,13 +78,13 @@
 #
 # ## Parameter Sets
 # - ✅ Chen 2020 (LG INR21700 M50)
-# - ✅ Xu 2015
-# - ✅ Chayambuka 2022
-# - ❌ Marquis 2019
-# - ❌ Ecker 2015
-# - ❌ Mohtat 2020
-# - ❌ OKane 2022
-# - ❌ Ai 2020
+# - ✅ Xu 2015 – comparison: `xu2015_comparison.jl`
+# - ✅ Chayambuka 2022 – comparison: `chayambuka2022_comparison.jl`
+# - 🔧 Marquis 2019 – PyBaMM only, comparison: `marquis2019_comparison.jl`
+# - 🔧 Ecker 2015 – PyBaMM only, comparison: `ecker2015_comparison.jl`
+# - 🔧 Mohtat 2020 – PyBaMM only, comparison: `mohtat2020_comparison.jl`
+# - 🔧 OKane 2022 – PyBaMM only, comparison: `okane2022_comparison.jl`
+# - 🔧 Ai 2020 – PyBaMM only, comparison: `ai2020_comparison.jl`
 #
 # ## Output / Post-Processing
 # - ✅ Voltage, current, capacity time series
@@ -94,6 +95,11 @@
 # - ❌ Electrochemical impedance spectroscopy (EIS) — frequency domain
 #
 # ## PyBaMM Interop
-# - ✅ `run_pybamm()` – run PyBaMM simulations from Julia
+# - ✅ `run_pybamm()` – run PyBaMM simulations from Julia (CC discharge + Experiment cycling)
 # - ✅ Comparison examples (Chen 2020 DFN discharge, multi-C-rate, SEI, thermal, SPMe)
+# - ✅ Multi-cycle SEI comparison: `chen2020_sei_cycling_comparison.jl`
+# - ✅ Parameter-set comparisons: Xu 2015, Chayambuka 2022, Marquis 2019, Ecker 2015,
+#      Mohtat 2020, OKane 2022, Ai 2020
+# - ✅ Control protocol comparison (CC, CC cycling, CCCV, multi-cycle CCCV):
+#      `control_protocol_comparison.jl`
 # - ✅ Performance benchmarking framework
