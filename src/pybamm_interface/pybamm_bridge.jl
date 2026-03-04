@@ -106,6 +106,8 @@ A `NamedTuple` with fields:
 - `time::Vector{Float64}` – time in seconds
 - `voltage::Vector{Float64}` – cell voltage in V
 - `current::Vector{Float64}` – cell current in A
+- `sei_thickness::Union{Nothing, Vector{Float64}}` – total SEI thickness in m (only when `sei = true`)
+- `cell_temperature::Union{Nothing, Vector{Float64}}` – volume-averaged cell temperature in K (only when `thermal = true`)
 
 # Example
 ```julia
@@ -201,5 +203,33 @@ function run_pybamm(;
 	voltage = pyconvert(Vector{Float64}, sol["Voltage [V]"].entries)
 	current = pyconvert(Vector{Float64}, sol["Current [A]"].entries)
 
-	return (time = time_s, voltage = voltage, current = current)
+	# Extract SEI thickness if SEI model is enabled
+	sei_thickness = nothing
+	if sei
+		try
+			sei_thickness = pyconvert(Vector{Float64}, sol["Total SEI thickness [m]"].entries)
+		catch
+			try
+				sei_thickness = pyconvert(Vector{Float64}, sol["X-averaged total SEI thickness [m]"].entries)
+			catch
+				@warn "Could not extract SEI thickness from PyBaMM solution"
+			end
+		end
+	end
+
+	# Extract cell temperature if thermal model is enabled
+	cell_temperature = nothing
+	if thermal
+		try
+			cell_temperature = pyconvert(Vector{Float64}, sol["X-averaged cell temperature [K]"].entries)
+		catch
+			try
+				cell_temperature = pyconvert(Vector{Float64}, sol["Cell temperature [K]"].entries)
+			catch
+				@warn "Could not extract cell temperature from PyBaMM solution"
+			end
+		end
+	end
+
+	return (time = time_s, voltage = voltage, current = current, sei_thickness = sei_thickness, cell_temperature = cell_temperature)
 end

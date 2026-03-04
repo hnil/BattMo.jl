@@ -95,5 +95,5 @@
 #
 # ## PyBaMM Interop
 # - ✅ `run_pybamm()` – run PyBaMM simulations from Julia
-# - ✅ Comparison examples (Chen 2020 DFN discharge)
+# - ✅ Comparison examples (Chen 2020 DFN discharge, multi-C-rate, SEI, thermal, SPMe)
 # - ✅ Performance benchmarking framework

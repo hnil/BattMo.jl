@@ -1,10 +1,9 @@
-# # Chen 2020 DFN Model – BattMo.jl vs PyBaMM Comparison (Multiple C-Rates)
+# # Chen 2020 SPMe Model – BattMo.jl vs PyBaMM Comparison
 #
-# This example runs the Chen 2020 DFN (Doyle-Fuller-Newman) model in both
-# **BattMo.jl** and **PyBaMM** (called from Julia via PythonCall) at multiple
-# C-rates and compares the resulting discharge-voltage curves.  The time stepping
-# and protocol are set to be equivalent between the two frameworks, and the
-# simulations run into the voltage cutoff region.
+# This example compares the Single Particle Model with electrolyte (SPMe)
+# between BattMo.jl and PyBaMM using the Chen 2020 parameter set at multiple
+# C-rates.  The SPMe is a simplified version of the DFN model and is faster to
+# solve while still capturing electrolyte effects.
 #
 # ## Prerequisites
 # PyBaMM must be installed in the Python environment used by PythonCall:
@@ -19,16 +18,16 @@ using GLMakie
 c_rates = [0.5, 1.0, 2.0]
 colors = [:blue, :green, :purple]
 
-# ### 2. Run simulations at each C-rate
+# ### 2. Run SPMe simulations at each C-rate
 fig = Figure(size = (1000, 500))
 ax = Axis(fig[1, 1];
-	title  = "Chen 2020 – CC Discharge: BattMo.jl vs PyBaMM",
+	title  = "Chen 2020 SPMe – CC Discharge: BattMo.jl vs PyBaMM",
 	xlabel = "Time [s]",
 	ylabel = "Voltage [V]",
 )
 
 for (i, Crate) in enumerate(c_rates)
-	# --- BattMo.jl ---
+	# --- BattMo.jl SPMe ---
 	cell_parameters = load_cell_parameters(; from_default_set = "chen_2020")
 	cycling_protocol = load_cycling_protocol(; from_default_set = "cc_discharge")
 	cycling_protocol["DRate"] = Crate
@@ -40,17 +39,14 @@ for (i, Crate) in enumerate(c_rates)
 	time_battmo = output_battmo.time_series["Time"]
 	voltage_battmo = output_battmo.time_series["Voltage"]
 
-	# --- PyBaMM ---
-	# Use equivalent time evaluation points so both frameworks are sampled the
-	# same way.  The time span extends beyond 1/C hours to capture the voltage
-	# cutoff region.
+	# --- PyBaMM SPMe ---
 	t_end = 3700.0 / Crate
 	dt_fixed = 10.0
 	n_points = max(200, round(Int, t_end / dt_fixed))
 	t_eval = collect(range(0.0, t_end; length = n_points))
 
 	result_pybamm = run_pybamm(;
-		model_name    = "DFN",
+		model_name    = "SPMe",
 		parameter_set = "Chen2020",
 		C_rate        = Crate,
 		t_eval        = t_eval,
