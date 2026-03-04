@@ -15,11 +15,13 @@ using Printf
 
 # ### 1. Warm-up calls (compilation / import)
 println("Warming up BattMo.jl …")
+Crate = 0.5
 simulation_input = load_full_simulation_input(; from_default_set = "chen_2020")
+simulation_input["CyclingProtocol"]["DRate"] = Crate  
 _ = run_simulation(simulation_input; info_level = -1)
 
 println("Warming up PyBaMM …")
-_ = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = 1.0)
+_ = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = Crate)
 
 # ### 2. Timed runs
 n_runs = 3
@@ -39,7 +41,7 @@ end
 pybamm_times = Float64[]
 for i in 1:n_runs
 	t = @elapsed begin
-		_ = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = 1.0)
+		_ = run_pybamm(; model_name = "DFN", parameter_set = "Chen2020", C_rate = Crate)
 	end
 	push!(pybamm_times, t)
 	@printf("  PyBaMM     run %d: %.3f s\n", i, t)

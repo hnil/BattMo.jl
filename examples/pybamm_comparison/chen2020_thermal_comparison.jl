@@ -23,9 +23,8 @@ solver_settings = load_solver_settings(; from_default_set = "direct")
 
 model_setup = LithiumIonBattery(; model_settings)
 sim = Simulation(model_setup, cell_parameters, cycling_protocol; simulation_settings)
-output_battmo = solve(sim)
-
-states_battmo = output_battmo[:states]
+output_battmo = solve(sim; accept_invalid = true)
+states_battmo = output_battmo.states
 time_battmo = [state[:Control][:Controller].time for state in states_battmo]
 voltage_battmo = [state[:Control][:ElectricPotential][1] for state in states_battmo]
 

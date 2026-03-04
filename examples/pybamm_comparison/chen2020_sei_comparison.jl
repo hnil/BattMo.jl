@@ -39,6 +39,7 @@ result_pybamm = run_pybamm(;
 	model_name    = "DFN",
 	parameter_set = "Chen2020",
 	C_rate        = 1.0,
+	thermal       = false,
 	sei           = true,
 )
 
