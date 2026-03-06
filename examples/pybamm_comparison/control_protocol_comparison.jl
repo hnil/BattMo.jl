@@ -12,7 +12,7 @@
 #
 # ## Prerequisites
 # PyBaMM must be installed in the Python environment used by PythonCall.
-
+using PythonCall
 using BattMo
 using GLMakie
 
@@ -59,14 +59,15 @@ cycling_protocol_cc = load_cycling_protocol(; from_default_set = "cc_cycling")
 cycling_protocol_cc["TotalNumberOfCycles"] = 3
 
 sim_cc = Simulation(LithiumIonBattery(), cell_parameters_cc, cycling_protocol_cc)
-out_cc_cyc = solve(sim_cc; info_level = -1)
+out_cc_cyc = solve(sim_cc; info_level = 1)
 
 res_cc_cyc = run_pybamm(;
 	model_name    = "DFN",
 	parameter_set = "Chen2020",
+	initial_soc=0.01,
 	experiment    = repeat([
 		"Charge at 0.5C until 4.1 V",
-		"Discharge at 0.5C until 2.5 V",
+		"Discharge at 0.5 C until 2.5 V",	
 	], 3),
 )
 
@@ -95,7 +96,8 @@ out_cccv = solve(sim_cccv; info_level = -1)
 res_cccv = run_pybamm(;
 	model_name    = "DFN",
 	parameter_set = "Chen2020",
-	experiment    = repeat([
+	initial_soc=0.01,
+	experiment    = repeat([		
 		"Charge at 1C until 4.0 V",
 		"Hold at 4.0 V until C/50",
 		"Discharge at 1C until 3.0 V",
@@ -127,6 +129,7 @@ out_mc = solve(sim_mc; info_level = -1)
 res_mc = run_pybamm(;
 	model_name    = "DFN",
 	parameter_set = "Chen2020",
+	initial_soc=0.01,
 	experiment    = repeat([
 		"Charge at 1C until 4.0 V",
 		"Hold at 4.0 V until C/50",

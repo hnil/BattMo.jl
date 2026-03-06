@@ -134,6 +134,7 @@ function run_pybamm(;
 	model_name::String = "DFN",
 	parameter_set::String = "Chen2020",
 	C_rate::Float64 = 1.0,
+	initial_soc::Float64 = 1.0,
 	t_eval::Union{Nothing, AbstractVector} = nothing,
 	temperature::Union{Nothing, Float64} = nothing,
 	thermal::Bool = false,
@@ -204,7 +205,7 @@ function run_pybamm(;
 	if !isnothing(experiment)
 		py_experiment = pybamm.Experiment(pylist(experiment))
 		sim = pybamm.Simulation(py_model; experiment = py_experiment, parameter_values = params)
-		sol = sim.solve()
+		sol = sim.solve(initial_soc=initial_soc)
 	else
 		sim = pybamm.Simulation(py_model; parameter_values = params)
 		if isnothing(t_eval)
@@ -216,7 +217,7 @@ function run_pybamm(;
 		else
 			py_t_eval = np.array(collect(Float64, t_eval))
 		end
-		sol = sim.solve(; t_eval = py_t_eval)
+		sol = sim.solve(initial_soc=initial_soc; t_eval = py_t_eval)
 	end
 
 	# Extract results to Julia vectors
