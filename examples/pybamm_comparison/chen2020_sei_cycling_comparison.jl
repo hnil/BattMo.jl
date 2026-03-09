@@ -32,7 +32,7 @@ cycling_protocol["TotalNumberOfCycles"] = n_cycles
 
 model_setup = LithiumIonBattery(; model_settings)
 sim = Simulation(model_setup, cell_parameters, cycling_protocol; simulation_settings)
-output_battmo = solve(sim; info_level = -1)
+output_battmo = solve(sim; info_level = 1)
 
 time_battmo = output_battmo.time_series["Time"]
 voltage_battmo = output_battmo.time_series["Voltage"]
@@ -52,6 +52,7 @@ experiment_steps = repeat([
 result_pybamm = run_pybamm(;
 	model_name    = "DFN",
 	parameter_set = "Chen2020",
+	initial_soc=0.01,
 	sei           = true,
 	experiment    = experiment_steps,
 )
