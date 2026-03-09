@@ -18,5 +18,6 @@ include("test_loader.jl")
 include("test_matlab_input.jl")
 include("test_temperature_dependence.jl")
 include("test_pybamm.jl")
+include("test_pybamm_conversion.jl")
 
 
